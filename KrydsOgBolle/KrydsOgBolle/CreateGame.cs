@@ -25,6 +25,7 @@ namespace KrydsOgBolle
             log.Info($"Game started by {gamestate.Player1}");
             gamestate.PartitionKey = Guid.NewGuid().ToString();
             gamestate.RowKey = "";
+            //her skal vi sætte brættet til et tomt bræt
             // gamestate.BoardRow1 = "---";
             // gamestate.BoardRow2 = "---";
             // gamestate.BoardRow3 = "---";
