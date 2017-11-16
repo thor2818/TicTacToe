@@ -10,17 +10,18 @@ using System.Linq;
 
 namespace KrydsOgBolle
 {
-    public static class JoinGame
+    public static class TakeTurn
     {
-        [FunctionName("JoinGame")]
+        [FunctionName("TakeTurn")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post")]HttpRequestMessage req,
             [Table("gamestate", Connection = "AzureWebJobsStorage")]IQueryable<GameState> inTable,
             [Table("gamestate", Connection = "AzureWebJobsStorage")]CloudTable outTable,
             TraceWriter log)
         {
             dynamic data = await req.Content.ReadAsAsync<object>();
-            string name = data?.name;
+            string name = data?.player;
             string partitionkey = data?.partitionKey;
+            int? pos = data?.position;
 
             if (string.IsNullOrEmpty(name))
             {
@@ -29,7 +30,12 @@ namespace KrydsOgBolle
 
             if (string.IsNullOrEmpty(partitionkey))
             {
-                return req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a PartitionKey in the request body");
+                return req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a partitionKey in the request body");
+            }
+
+            if (pos == null || pos < 0 || pos > 8)
+            {
+                return req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a pos from 0 to 8 in the request body");
             }
 
             var query = from game in inTable
@@ -37,8 +43,23 @@ namespace KrydsOgBolle
                         select game;
 
             GameState g = query.FirstOrDefault();
+            char[] positions = g.Board.ToCharArray();
+            if(positions[(int)pos] != '-')
+                return req.CreateResponse(HttpStatusCode.BadRequest, "Position is already taken");
 
-            g.Player2 = name;
+
+            if (g.PlayerTurn == 1)
+            {
+                g.PlayerTurn = 2;
+                positions[(int)pos] = 'X';
+
+            }
+            else
+            {
+                g.PlayerTurn = 1;
+                positions[(int)pos] = 'O';
+            }
+            g.Board = new string(positions);
 
             TableOperation updateOperation = TableOperation.Replace(g);
             TableResult result = outTable.Execute(updateOperation);

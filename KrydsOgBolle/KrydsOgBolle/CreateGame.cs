@@ -12,9 +12,12 @@ namespace KrydsOgBolle
     public static class CreateGame
     {
         [FunctionName("CreateGame")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Function, "put")]GameState gamestate, [Table("gamestate", Connection = "AzureWebJobsStorage")]CloudTable outTable, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post")]HttpRequestMessage req, [Table("gamestate", Connection = "AzureWebJobsStorage")]CloudTable outTable, TraceWriter log)
         {
-            if (string.IsNullOrEmpty(gamestate.Player1))
+            dynamic data = await req.Content.ReadAsAsync<object>();
+            string name = data?.name;
+
+            if (string.IsNullOrEmpty(name))
             {
                 return new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
@@ -22,15 +25,16 @@ namespace KrydsOgBolle
                 };
             };
 
-            log.Info($"Game started by {gamestate.Player1}");
+            log.Info($"Game started by {name}");
+            GameState gamestate = new GameState();
             gamestate.PartitionKey = Guid.NewGuid().ToString();
             gamestate.RowKey = "";
-            // gamestate.BoardRow1 = "---";
-            // gamestate.BoardRow2 = "---";
-            // gamestate.BoardRow3 = "---";
+            gamestate.Player1 = name;
+            gamestate.PlayerTurn = 1;
+            gamestate.Board = "---------";
             TableOperation updateOperation = TableOperation.InsertOrReplace(gamestate);
             TableResult result = outTable.Execute(updateOperation);
-            return new HttpResponseMessage((HttpStatusCode)result.HttpStatusCode);
+            return req.CreateResponse(HttpStatusCode.OK, gamestate);
         }
 
     }
