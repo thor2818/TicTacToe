@@ -32,6 +32,7 @@ namespace KrydsOgBolle
             gamestate.Player1 = name;
             gamestate.PlayerTurn = 1;
             gamestate.Board = "---------";
+
             TableOperation updateOperation = TableOperation.InsertOrReplace(gamestate);
             TableResult result = outTable.Execute(updateOperation);
             return req.CreateResponse(HttpStatusCode.OK, gamestate);
