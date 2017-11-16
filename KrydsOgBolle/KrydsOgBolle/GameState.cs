@@ -11,8 +11,7 @@ namespace KrydsOgBolle
     {
         public string Player1 { get; set; }
         public string Player2 { get; set; }
-        public string BoardRow1 { get; set; }
-        public string BoardRow2 { get; set; }
-        public string BoardRow3 { get; set; }
+        public string Board { get; set; }
+        public int PlayerTurn { get; set; }
     }
 }
