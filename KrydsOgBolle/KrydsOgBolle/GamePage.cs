@@ -13,9 +13,9 @@ namespace ServerlessTicTacToe
     public static class PlayGame
     {
         [FunctionName("GamePage")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "GamePage")]HttpRequestMessage req, TraceWriter log)
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "GamePage")]HttpRequestMessage req, TraceWriter log, ExecutionContext context)
         {
-            string path = @"TicTacToe.html";
+            string path = Path.Combine(context.FunctionDirectory.Substring(0, context.FunctionDirectory.LastIndexOf("\\")), "TicTacToe.html");
             string html = File.ReadAllText(path);
 
             var response = new HttpResponseMessage(HttpStatusCode.OK);
