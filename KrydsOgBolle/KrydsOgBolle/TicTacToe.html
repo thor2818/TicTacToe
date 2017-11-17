@@ -43,10 +43,10 @@
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript">
-        var createGameUrl = "http://localhost:7071/api/CreateGame";
-        var getGameUrl = "http://localhost:7071/api/GetGame?gameid={gameid}&join=true";
-        var joinGameUrl = "http://localhost:7071/api/JoinGame";
-        var takeTurnGameUrl = "http://localhost:7071/api/TakeTurn";
+        var createGameUrl = "/api/CreateGame";
+        var getGameUrl = "/api/GetGame?gameid={gameid}&join=true";
+        var joinGameUrl = "/api/JoinGame";
+        var takeTurnGameUrl = "/api/TakeTurn";
         var gamestate = undefined;
 
         $(document).ready(function () {
