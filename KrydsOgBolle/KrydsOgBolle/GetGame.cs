@@ -12,17 +12,17 @@ namespace KrydsOgBolle
     public static class GetGame
     {
         [FunctionName("GetGame")]
-        public static async Task<HttpResponseMessage > Run([HttpTrigger(AuthorizationLevel.Function, "post")]HttpRequestMessage req, [Table("gamestate", Connection = "AzureWebJobsStorage")]IQueryable<GameState> inTable, TraceWriter log)
+        public static async Task<HttpResponseMessage > Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")]HttpRequestMessage req, [Table("gamestate", Connection = "AzureWebJobsStorage")]IQueryable<GameState> inTable, TraceWriter log)
         {
             dynamic data = await req.Content.ReadAsAsync<object>();
-            string partitionkey = data?.partitionkey;
+            string partitionkey = data?.gameid;
 
             if (string.IsNullOrEmpty(partitionkey))
             {
                 return req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a name in the request body");
             }
             var query = from game in inTable where game.PartitionKey == partitionkey select game;
-            return req.CreateResponse(HttpStatusCode.OK, query.ToList());
+            return req.CreateResponse(HttpStatusCode.OK, query.FirstOrDefault());
         }
     }
     

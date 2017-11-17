@@ -44,7 +44,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript">
         var createGameUrl = "http://localhost:7071/api/CreateGame";
-        var getGameUrl = "http://localhost:7071/api/GetGame/{gameid}";
+        var getGameUrl = "http://localhost:7071/api/GetGame?gameid={gameid}&join=true";
         var joinGameUrl = "http://localhost:7071/api/JoinGame";
         var takeTurnGameUrl = "http://localhost:7071/api/TakeTurn";
         var gamestate = undefined;
@@ -53,22 +53,19 @@
             $(".cell").click(boardClick);
             $("#buttonGo").click(buttonGoClick);
             var gameid = $.urlParam("gameid");
+            join = $.urlParam("join");
+            myname = $.urlParam("myname");
 
             if (gameid) {
                 console.log("Got gameid: " + gameid);
-                var url = getGameUrl.replace("{gameid}", gameid);
-                $.getJSON(url, function (data) {
-                    newGameData(data);
-                });
+                GetGame(gameid);
             }
-
-            if (!gamestate) {
+            else {
                 $("#board").hide();
                 setPlayerNames(undefined, undefined);
-
             }
         });
-
+        
         $.urlParam = function (name) {
             var results = new RegExp('[\?&]' + name + '=([^&#]*)')
                 .exec(window.location.href);
@@ -106,6 +103,19 @@
                     JoinGame($("#PlayerName").val(), gamestate.PartitionKey);
         }
 
+        function GetGame(gameid) {
+            $.ajax({
+                url: getGameUrl,
+                type: "POST",
+                data: JSON.stringify({ gameid: gameid }),
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    newGameData(data);
+                }
+            });
+        }
+
         function CreateGame(p1) {
             $.ajax({
                 url: createGameUrl,
@@ -114,6 +124,7 @@
                 contentType: "application/json",
                 dataType: "json",
                 success: function (data) {
+                    myname = data.Player1;
                     newGameData(data);
                 }
             });
@@ -127,6 +138,7 @@
                 contentType: "application/json",
                 dataType: "json",
                 success: function (data) {
+                    myname = data.Player2;
                     newGameData(data);
                 }
             });
@@ -140,6 +152,9 @@
                 contentType: "application/json",
                 dataType: "json",
                 success: function (data) {
+                    newGameData(data);
+                },
+                error: function (data,x,y) {
                     newGameData(data);
                 }
             });
@@ -158,9 +173,17 @@
                 $("#Header").hide();
             }
             else
-                if (!p2) {
+                if (!p2 && join=="true") {
                     $("#StartGame").show();
+                    $("#InviteUrl").hide();
                     $("#Header").text(p1+" VS ?").show();
+                }
+                else
+                if (!p2) {
+                    $("#StartGame").hide();
+                    $("#InviteUrl").html(CreateInviteUrl());
+                    $("#InviteUrl").show();
+                    $("#Header").text(p1 + " VS ?").show();
                 }
                 else {
                     $("#StartGame").hide();
@@ -168,6 +191,11 @@
                     $("#board").show();
                 }
 
+        }
+
+        function CreateInviteUrl() {
+            var url = "Send this link to a friend: " + window.location.href + "?gameid=" + gamestate.PartitionKey;
+            return url;
         }
 
         function renderBoard(board) {
@@ -184,6 +212,9 @@
     <h2 id="Header" style="display:none"></h2>
     <div id="StartGame" style="display:none">
         Please choose a name: <input type="text" id="PlayerName" /><input value="GO!" type="button" id="buttonGo" />
+    </div>
+    <div id="InviteUrl" style="display:none">
+        Send this link to a friend: 
     </div>
     <div id="board">
         <div class="row">

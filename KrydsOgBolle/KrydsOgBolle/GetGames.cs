@@ -11,7 +11,7 @@ namespace KrydsOgBolle
     public static class GetGames
     {
         [FunctionName("GetGames")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Function, "get")]HttpRequestMessage req, [Table("gamestate", Connection = "AzureWebJobsStorage")]IQueryable<GameState> inTable, TraceWriter log)
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")]HttpRequestMessage req, [Table("gamestate", Connection = "AzureWebJobsStorage")]IQueryable<GameState> inTable, TraceWriter log)
         {
             var query = from game in inTable select game;
             return req.CreateResponse(HttpStatusCode.OK, inTable.ToList());

@@ -13,7 +13,7 @@ namespace KrydsOgBolle
     public static class TakeTurn
     {
         [FunctionName("TakeTurn")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post")]HttpRequestMessage req,
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")]HttpRequestMessage req,
             [Table("gamestate", Connection = "AzureWebJobsStorage")]IQueryable<GameState> inTable,
             [Table("gamestate", Connection = "AzureWebJobsStorage")]CloudTable outTable,
             TraceWriter log)
@@ -45,7 +45,7 @@ namespace KrydsOgBolle
             GameState g = query.FirstOrDefault();
             char[] positions = g.Board.ToCharArray();
             if(positions[(int)pos] != '-')
-                return req.CreateResponse(HttpStatusCode.BadRequest, "Position is already taken");
+                return req.CreateResponse(HttpStatusCode.BadRequest, g);
 
 
             if (g.PlayerTurn == 1)

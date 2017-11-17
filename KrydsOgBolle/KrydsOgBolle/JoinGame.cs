@@ -13,7 +13,7 @@ namespace KrydsOgBolle
     public static class JoinGame
     {
         [FunctionName("JoinGame")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post")]HttpRequestMessage req,
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")]HttpRequestMessage req,
             [Table("gamestate", Connection = "AzureWebJobsStorage")]IQueryable<GameState> inTable,
             [Table("gamestate", Connection = "AzureWebJobsStorage")]CloudTable outTable,
             TraceWriter log)

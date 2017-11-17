@@ -12,7 +12,7 @@ namespace KrydsOgBolle
     public static class CreateGame
     {
         [FunctionName("CreateGame")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post")]HttpRequestMessage req, [Table("gamestate", Connection = "AzureWebJobsStorage")]CloudTable outTable, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")]HttpRequestMessage req, [Table("gamestate", Connection = "AzureWebJobsStorage")]CloudTable outTable, TraceWriter log)
         {
             dynamic data = await req.Content.ReadAsAsync<object>();
             string name = data?.name;
@@ -37,6 +37,6 @@ namespace KrydsOgBolle
             TableResult result = outTable.Execute(updateOperation);
             return req.CreateResponse(HttpStatusCode.OK, gamestate);
         }
-
+            
     }
 }
